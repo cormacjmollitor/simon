@@ -65,12 +65,110 @@ function NoteBox(key, onClick) {
 // This will create a map from key strings (i.e. 'c') to NoteBox objects so that
 // clicking the corresponding boxes on the page will play the NoteBox's audio.
 // It will also demonstrate programmatically playing notes by calling play directly.
+/*
 var notes = {};
 
 KEYS.forEach(function (key) {
 	notes[key] = new NoteBox(key);
 });
-
+/*
 KEYS.concat(KEYS.slice().reverse()).forEach(function(key, i) {
 	setTimeout(notes[key].play.bind(null, key), i * NOTE_DURATION);
-});
+});*/
+
+function echo(){
+  const timeOut = 2500;
+  var boxes = []; //Contains references to the box DOM elements
+  var notes = {};
+  var noteBuffer = []; //What is played after 2.5 seconds of now mouse clicks over boxes
+  var currentTimeout = setTimeout(null, 0);
+
+  //Create the NoteBox objects for each box and get references for each box DOM element
+  KEYS.forEach(function(key) {
+    notes[key] = new NoteBox(key);
+    boxes.push(document.getElementById(key));
+  });
+
+  //Play the notes in the note buffer and then clear it
+  var playBuffer = function(){
+    noteBuffer.forEach(function(note, i){
+      setTimeout(note.play.bind(null, note), i * NOTE_DURATION);
+    });
+    noteBuffer.splice(0, noteBuffer.length);
+  };
+
+  //Append a key to the note buffer and reset the timer
+  var appendKey = function(key){
+    clearTimeout(currentTimeout);
+    noteBuffer.push(notes[key]);
+    currentTimeout = setTimeout(playBuffer, timeOut);
+  };
+
+  //When a box is pressed, append a key to the note buffer
+  boxes.forEach(function(box){
+    box.addEventListener('mousedown', function(){appendKey(box.id)});
+  });
+}
+
+//echo();
+
+function simon(){
+  var boxes = [];
+  var notes = {};
+  var score = 0;
+  var simonNotes = [];
+  var playerNotes = [];
+  var success = true;
+  var scoreElement = document.getElementById('score')
+  scoreElement.value = score;
+
+  //Create the NoteBox objects for each box and get references for each box DOM element
+  KEYS.forEach(function(key) {
+    notes[key] = new NoteBox(key);
+    boxes.push(document.getElementById(key));
+  });
+
+  //Adds a new note to simon's notes
+  this.addSimonNote = function(){
+    var key = KEYS[Math.floor(Math.random() * 4)];
+    simonNotes.push(notes[key]);
+  };
+
+  this.playSimonNotes = function(){
+    simonNotes.forEach(function(note, i){
+      setTimeout(note.play.bind(null, note), i * NOTE_DURATION);
+    });
+  };
+  
+  this.addPlayerNote = function(key){
+    success = false;
+    var noteIndex = playerNotes.length;
+    playerNotes.push(notes[key]);
+
+    //clear both note lists, reset score, and restart
+    if(simonNotes[noteIndex] != playerNotes[noteIndex]){
+      score = 0;
+      simonNotes.splice(0, simonNotes.length);
+      playerNotes.splice(0, playerNotes.length);
+      setTimeout(addSimonNote, 1);
+      setTimeout(playSimonNotes, 2000);
+    }
+
+    //clear player list, increment score, 
+    else if(simonNotes.length == noteIndex+1){
+      score++;
+      playerNotes.splice(0, playerNotes.length);
+      setTimeout(addSimonNote, 1);
+      setTimeout(playSimonNotes, 2000);
+    }
+  };
+
+  setTimeout(addSimonNote, 1);
+  setTimeout(playSimonNotes, 2000);
+
+  boxes.forEach(function(box){
+    box.addEventListener('mousedown', function(){addPlayerNote(box.id)});
+  });
+}
+
+simon();
