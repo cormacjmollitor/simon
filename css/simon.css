@@ -21,10 +21,38 @@ html, body {
   cursor: pointer;
 }
 
+/* 
+* Adapted code from link below to make the circle with 4 segments
+* 
+* https://stackoverflow.com/questions/29006214/how-to-divide-a-circle-into-12-equal-parts-with-color-using-css3-javascript
+*/
+
+.simon-circle {
+  position: relative;
+  border: 1px solid black;
+  padding: 0;
+  margin: 1em auto;
+  width: 20em;
+  height: 20em;
+  border-radius: 50%;
+  list-style: none;
+  overflow: hidden;
+}
+
+.simon-segment {
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 50%;
+  transform-origin: 0% 100%;
+}
+
 /* Per-note styles */
 #c {
     background-color: rgba(238, 0, 55, 0.4);
-    border: 3px solid rgba(238, 0, 55, 1);
+    transform: rotate(90deg);
 }
 
 #c.active {
@@ -41,7 +69,7 @@ html, body {
 
 #d {
     background-color: rgba(255, 176, 0, 0.4);
-    border: 3px solid rgba(255, 176, 0, 1);
+    transform: rotate(270deg);
 }
 
 #d.active {
@@ -58,7 +86,7 @@ html, body {
 
 #e {
     background-color: rgba(17, 57, 187, 0.4);
-    border: 3px solid rgba(17, 57, 187, 1);
+    transform: rotate(180deg);
 }
 
 #e.active {
@@ -75,7 +103,7 @@ html, body {
 
 #f {
     background-color: rgba(85, 229, 0, 0.4);
-    border: 3px solid rgba(85, 229, 0, 1);
+    transform: rotate(0deg);
 }
 
 #f.active {

@@ -60,115 +60,97 @@ function NoteBox(key, onClick) {
 	boxEl.addEventListener('mousedown', this.clickHandler);
 }
 
-// Example usage of NoteBox.
-//
-// This will create a map from key strings (i.e. 'c') to NoteBox objects so that
-// clicking the corresponding boxes on the page will play the NoteBox's audio.
-// It will also demonstrate programmatically playing notes by calling play directly.
-/*
-var notes = {};
-
-KEYS.forEach(function (key) {
-	notes[key] = new NoteBox(key);
-});
-/*
-KEYS.concat(KEYS.slice().reverse()).forEach(function(key, i) {
-	setTimeout(notes[key].play.bind(null, key), i * NOTE_DURATION);
-});*/
-
 function echo(){
   const timeOut = 2500;
-  var boxes = []; //Contains references to the box DOM elements
+  var segments = []; // Contains references to the box DOM elements
   var notes = {};
-  var noteBuffer = []; //What is played after 2.5 seconds of now mouse clicks over boxes
-  var currentTimeout = setTimeout(null, 0);
+  var noteBuffer = []; // What is played after 2.5 seconds of no mouse clicks over segments
+  var currentTimeout = setTimeout(null, 0); // Timeout variable that will be reset everytime 
 
-  //Create the NoteBox objects for each box and get references for each box DOM element
+  // Create the NoteBox objects for each box and get references for each box DOM element
   KEYS.forEach(function(key) {
     notes[key] = new NoteBox(key);
-    boxes.push(document.getElementById(key));
+    segments.push(document.getElementById(key));
   });
 
-  //Play the notes in the note buffer and then clear it
-  var playBuffer = function(){
+  // Play the notes in the note buffer and then clear it
+  function playBuffer(){
     noteBuffer.forEach(function(note, i){
       setTimeout(note.play.bind(null, note), i * NOTE_DURATION);
     });
     noteBuffer.splice(0, noteBuffer.length);
   };
 
-  //Append a key to the note buffer and reset the timer
-  var appendKey = function(key){
+  // Append a key to the note buffer and reset the timer
+  function appendKey(key){
     clearTimeout(currentTimeout);
     noteBuffer.push(notes[key]);
-    currentTimeout = setTimeout(playBuffer, timeOut);
+    currentTimeout = setTimeout(function(){playBuffer()}, timeOut);
   };
 
-  //When a box is pressed, append a key to the note buffer
-  boxes.forEach(function(box){
+  // When a box is pressed, append a key to the note buffer
+  segments.forEach(function(box){
     box.addEventListener('mousedown', function(){appendKey(box.id)});
   });
 }
 
-//echo();
-
 function simon(){
-  var boxes = [];
+  var segments = [];
   var notes = {};
-  var score = 0;
   var simonNotes = [];
   var playerNotes = [];
-  var success = true;
-  var scoreElement = document.getElementById('score')
-  scoreElement.value = score;
 
-  //Create the NoteBox objects for each box and get references for each box DOM element
+  // Create the NoteBox objects for each box and get references for each box DOM element
   KEYS.forEach(function(key) {
     notes[key] = new NoteBox(key);
-    boxes.push(document.getElementById(key));
+    segments.push(document.getElementById(key));
   });
 
-  //Adds a new note to simon's notes
-  this.addSimonNote = function(){
+  // Adds a new note to simon's notes
+  function addSimonNote(){
     var key = KEYS[Math.floor(Math.random() * 4)];
     simonNotes.push(notes[key]);
   };
 
-  this.playSimonNotes = function(){
+  // Plays simon's notes
+  function playSimonNotes(){
     simonNotes.forEach(function(note, i){
       setTimeout(note.play.bind(null, note), i * NOTE_DURATION);
     });
   };
   
-  this.addPlayerNote = function(key){
-    success = false;
+  // Adds the clicked segment's note to the player's note list.
+  // If the player chooses the wrong note, it restarts the game.
+  // If the player successfully completes simon's sequence, it adds 
+  // a new note to Simon's sequence and plays it.
+  function addPlayerNote(key){
     var noteIndex = playerNotes.length;
     playerNotes.push(notes[key]);
 
-    //clear both note lists, reset score, and restart
+    //clear both note lists and restart
     if(simonNotes[noteIndex] != playerNotes[noteIndex]){
-      score = 0;
       simonNotes.splice(0, simonNotes.length);
       playerNotes.splice(0, playerNotes.length);
-      setTimeout(addSimonNote, 1);
-      setTimeout(playSimonNotes, 2000);
+      addSimonNote();
+      setTimeout(function(){playSimonNotes()}, NOTE_DURATION + 500);
     }
 
-    //clear player list, increment score, 
+    // Clear player list and play new simon sequence
     else if(simonNotes.length == noteIndex+1){
-      score++;
       playerNotes.splice(0, playerNotes.length);
-      setTimeout(addSimonNote, 1);
-      setTimeout(playSimonNotes, 2000);
+      addSimonNote();
+      setTimeout(function(){playSimonNotes()}, NOTE_DURATION + 500);
     }
   };
 
-  setTimeout(addSimonNote, 1);
-  setTimeout(playSimonNotes, 2000);
+  // Initializes the game
+  addSimonNote();
+  playSimonNotes();
 
-  boxes.forEach(function(box){
+  segments.forEach(function(box){
     box.addEventListener('mousedown', function(){addPlayerNote(box.id)});
   });
 }
 
 simon();
+//echo();
